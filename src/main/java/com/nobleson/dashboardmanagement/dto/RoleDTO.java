@@ -19,7 +19,7 @@ public class RoleDTO {
 
     private String roleName;
 
-    private Set<Menu> menus = new HashSet<>();
+    private Set<MenuDTO> menus = new HashSet<>();
 
     private Timestamp createdOn;
 

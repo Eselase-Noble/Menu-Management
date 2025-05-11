@@ -1,7 +1,6 @@
 package com.nobleson.dashboardmanagement.controller;
 
 import com.nobleson.dashboardmanagement.dto.RoleDTO;
-import com.nobleson.dashboardmanagement.dto.UserDTO;
 import com.nobleson.dashboardmanagement.serviceInterface.RoleService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
