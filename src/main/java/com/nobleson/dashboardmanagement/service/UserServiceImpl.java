@@ -1,6 +1,7 @@
 package com.nobleson.dashboardmanagement.service;
 
 import com.nobleson.dashboardmanagement.DELETE_YN;
+import com.nobleson.dashboardmanagement.dto.RoleDTO;
 import com.nobleson.dashboardmanagement.dto.UserDTO;
 import com.nobleson.dashboardmanagement.mapper.UserMapper;
 import com.nobleson.dashboardmanagement.repository.UserRepository;
@@ -12,7 +13,9 @@ import org.springframework.stereotype.Service;
 import java.sql.Time;
 import java.sql.Timestamp;
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 @Service
 @RequiredArgsConstructor
@@ -95,5 +98,21 @@ public class UserServiceImpl implements UserService {
     @Override
     public void deleteUser(Long id) {
         userRepository.deleteUser(id);
+    }
+
+    /**
+     * @param id
+     * @param roleDTO
+     * @return
+     */
+    @Override
+    public UserDTO addRoleToUser(Long id, RoleDTO roleDTO) {
+        UserDTO userDTO = getUserById(id);
+        userDTO.setRoles(
+                Set.of(
+                        roleDTO
+                )
+        );
+        return updateUser(userDTO);
     }
 }

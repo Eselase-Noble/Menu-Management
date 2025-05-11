@@ -1,5 +1,6 @@
 package com.nobleson.dashboardmanagement.serviceInterface;
 
+import com.nobleson.dashboardmanagement.dto.RoleDTO;
 import com.nobleson.dashboardmanagement.dto.UserDTO;
 
 import java.util.List;
@@ -42,5 +43,7 @@ public interface UserService {
      * @param id the user id to be deleted
      */
     void deleteUser(Long id);
+
+    UserDTO addRoleToUser(Long id, RoleDTO roleDTO);
 
 }

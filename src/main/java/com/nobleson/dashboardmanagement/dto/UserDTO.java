@@ -21,7 +21,7 @@ public class UserDTO {
     private String username;
     private String password;
 
-    private Set<Role> roles;
+    private Set<RoleDTO> roles;
 
     private Timestamp createdOn;
     private Timestamp updatedOn;
