@@ -21,18 +21,11 @@ public class Menu {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private String menuId;
     private String parentId;
-    @Column(unique = true)
+
     private String menuUrl;
-    @Column(unique = true)
+
     private String menuName;
     private int level;
-
-    @ManyToOne
-    @JoinColumn(name = "parent_id")
-    private Menu parent;
-
-    @OneToMany(mappedBy = "parent")
-    private List<Menu> children = new ArrayList<>();
 
     @ManyToMany(mappedBy = "menus")
     private Set<Role> roles = new HashSet<>();

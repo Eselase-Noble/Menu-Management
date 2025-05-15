@@ -19,8 +19,7 @@ public class MenuDTO {
     private String menuUrl;
     private String menuName;
     private int level;
-    private Menu parent;
-    private List<Menu> children = new ArrayList<>();
+    private String parentId;
     private Set<Role> roles = new HashSet<>();
     private Timestamp createdOn;
     private Timestamp updatedOn;
