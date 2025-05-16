@@ -12,11 +12,13 @@ import java.util.Optional;
 @Repository
 public interface UserRepository extends JpaRepository<User, Long> {
 
+    @Query("select u From User u where u.DELETE_YN = com.nobleson.dashboardmanagement.DELETE_YN.N ")
     List<User> findAllByDELETE_YN(String delete_yn);
 
     Optional<User> findByUsername(String username);
 
-    User getUserByIdAndDELETE_YN(Long id, String delete_yn);
+    @Query("select u From User u where u.id = :id and u.DELETE_YN = :delete_yn")
+    User getUserByIdAndDELETE_YN(@Param("id") Long id, @Param("delete_yn") String delete_yn);
 
     @Query("UPDATE User u SET u.DELETE_YN = 'N' WHERE u.id = :id ")
     void deleteUser(@Param("id") Long id);

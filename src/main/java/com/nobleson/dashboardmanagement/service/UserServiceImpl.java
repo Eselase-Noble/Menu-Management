@@ -4,6 +4,9 @@ import com.nobleson.dashboardmanagement.DELETE_YN;
 import com.nobleson.dashboardmanagement.dto.RoleDTO;
 import com.nobleson.dashboardmanagement.dto.UserDTO;
 import com.nobleson.dashboardmanagement.mapper.UserMapper;
+import com.nobleson.dashboardmanagement.model.Role;
+import com.nobleson.dashboardmanagement.model.User;
+import com.nobleson.dashboardmanagement.repository.RoleRepository;
 import com.nobleson.dashboardmanagement.repository.UserRepository;
 import com.nobleson.dashboardmanagement.serviceInterface.UserService;
 import lombok.RequiredArgsConstructor;
@@ -14,6 +17,7 @@ import java.sql.Time;
 import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -24,6 +28,7 @@ public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
     private final UserMapper userMapper;
     private final PasswordEncoder passwordEncoder;
+    private final RoleRepository roleRepository;
 
     /**
      * Adds a new user to the system.
@@ -33,8 +38,22 @@ public class UserServiceImpl implements UserService {
      */
     @Override
     public UserDTO addUser(UserDTO userDTO) {
-
+        User user = userMapper.UserDTOToUser(userDTO);
         userDTO.setPassword(passwordEncoder.encode(userDTO.getPassword()));
+        if (user.getRoles() != null && !user.getRoles().isEmpty()) {
+            Set<Role> managedRoles = new HashSet<>();
+            for (Role role : user.getRoles()){
+                Role managedRole = roleRepository.findById(
+                        role.getRoleId()
+                ).orElseThrow(() -> new RuntimeException("Role not found"));
+                // ✅ Add user on owning side
+                managedRole.getUsers().add(user);
+                managedRoles.add(managedRole);
+            }
+            user.setRoles(managedRoles);
+        }
+
+
         userDTO.setDELETE_YN(DELETE_YN.N);
         userDTO.setCreatedOn(Timestamp.from(Instant.now()));
         userDTO.setUpdatedOn(Timestamp.from(Instant.now()));
@@ -56,7 +75,7 @@ public class UserServiceImpl implements UserService {
         updatedUser.setFirstName((userDTO.getFirstName() == null || userDTO.getFirstName().isEmpty()) ? updatedUser.getFirstName() : userDTO.getFirstName());
         updatedUser.setLastName((userDTO.getLastName() == null || userDTO.getLastName().isEmpty()) ? updatedUser.getLastName() : userDTO.getLastName());
         updatedUser.setUsername((userDTO.getUsername() == null || userDTO.getUsername().isEmpty()) ? updatedUser.getUsername() : userDTO.getUsername());
-        updatedUser.setRoles((userDTO.getRoles() == null) ? updatedUser.getRoles() : userDTO.getRoles());
+        updatedUser.setRoleIds((userDTO.getRoleIds() == null) ? updatedUser.getRoleIds() : userDTO.getRoleIds());
         updatedUser.setDELETE_YN(DELETE_YN.N);
 
         return userMapper.UserToUserDTO(
@@ -106,9 +125,9 @@ public class UserServiceImpl implements UserService {
      * @return
      */
     @Override
-    public UserDTO addRoleToUser(Long id, RoleDTO roleDTO) {
+    public UserDTO addRoleToUser(Long id, String roleDTO) {
         UserDTO userDTO = getUserById(id);
-        userDTO.setRoles(
+        userDTO.setRoleIds(
                 Set.of(
                         roleDTO
                 )

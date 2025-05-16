@@ -1,8 +1,11 @@
 package com.nobleson.dashboardmanagement.model;
 
 import com.nobleson.dashboardmanagement.DELETE_YN;
+import com.nobleson.dashboardmanagement.tree.interfaces.TreeNode;
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
@@ -16,16 +19,27 @@ import java.util.Set;
 @Entity
 @Setter
 @Getter
-public class Menu {
+@NoArgsConstructor
+@AllArgsConstructor
+public class Menu implements TreeNode<Menu> {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private String menuId;
-    private String parentId;
 
     private String menuUrl;
 
     private String menuName;
-    private int level;
+
+    @ManyToOne
+    @JoinColumn(name = "parent_id")
+    private Menu parent;
+
+    private Integer level;
+
+    private Integer sortOrder;
+
+    @OneToMany(mappedBy = "parent", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OrderBy("sortOrder ASC")
+    private List<Menu> children = new ArrayList<>();
 
     @ManyToMany(mappedBy = "menus")
     private Set<Role> roles = new HashSet<>();
@@ -34,7 +48,48 @@ public class Menu {
     private Timestamp createdOn;
     @UpdateTimestamp
     private Timestamp updatedOn;
-
+    @Enumerated(EnumType.STRING)
     private DELETE_YN DELETE_YN;
+
+    public Menu(String id, String menuName, String menuUrl, Integer level, Integer sortOrder) {
+        this.menuId = id;
+        this.menuName = menuName;
+        this.menuUrl = menuUrl;
+        this.level = level;
+        this.sortOrder = sortOrder;
+    }
+
+    /**
+     * @return
+     */
+    @Override
+    public String getMenuId() {
+        return menuId;
+    }
+
+    /**
+     * @return
+     */
+    @Override
+    public String getParentId() {
+        return parent != null ? parent.getMenuId() : null;
+    }
+
+    /**
+     * @return
+     */
+    @Override
+    public Menu getData() {
+        return this;
+    }
+
+    /**
+     * @param child
+     */
+    @Override
+    public void addChild(Menu child) {
+        children.add(child);
+        child.setParent(this);
+    }
 }
 

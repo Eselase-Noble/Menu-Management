@@ -64,7 +64,7 @@ public interface RoleService {
      * @param menus a list of MenuDTO objects representing the menus to be added to the role
      * @return the updated RoleDTO object after the menus have been added
      */
-    RoleDTO addMenusToRole(String roleName, Set<MenuDTO> menus);
+    RoleDTO addMenusToRole(String roleName, Set<String> menus);
 
     /**
      * Removes a single menu from a role in the system.
@@ -72,7 +72,7 @@ public interface RoleService {
      * @param menu the MenuDTO object representing the menu to be removed from the role
      * @return the updated RoleDTO object after the menu has been removed
      */
-    RoleDTO removeMenuFromRole(String roleName,MenuDTO menu);
+    RoleDTO removeMenuFromRole(String roleName,String menu);
 
     /**
      * Removes multiple menus from a role in the system.
@@ -80,7 +80,7 @@ public interface RoleService {
      * @param menus a list of MenuDTO objects representing the menus to be removed from the role
      * @return the updated RoleDTO object after the menus have been removed
      */
-    RoleDTO removeMenusFromRole(String roleName,Set<MenuDTO> menus);
+    RoleDTO removeMenusFromRole(String roleName,Set<String> menus);
 
 
 

@@ -44,6 +44,6 @@ public interface UserService {
      */
     void deleteUser(Long id);
 
-    UserDTO addRoleToUser(Long id, RoleDTO roleDTO);
+    UserDTO addRoleToUser(Long id, String roleDTO);
 
 }

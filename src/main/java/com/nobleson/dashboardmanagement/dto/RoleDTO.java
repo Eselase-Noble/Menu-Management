@@ -15,11 +15,11 @@ import java.util.Set;
 @AllArgsConstructor
 @NoArgsConstructor
 public class RoleDTO {
-    private Long id;
+    private String roleId;
 
     private String roleName;
 
-    private Set<MenuDTO> menus = new HashSet<>();
+    private Set<String> menuIds = new HashSet<>();
 
     private Timestamp createdOn;
 

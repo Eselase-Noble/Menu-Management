@@ -37,6 +37,9 @@ public class User {
     @UpdateTimestamp
     private Timestamp updatedOn;
 
+    @Enumerated(EnumType.STRING)
     private DELETE_YN DELETE_YN;
+
+
 }
 

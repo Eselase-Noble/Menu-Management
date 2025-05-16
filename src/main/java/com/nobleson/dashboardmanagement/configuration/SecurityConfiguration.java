@@ -33,8 +33,6 @@ import static org.springframework.security.config.Customizer.withDefaults;
 public class SecurityConfiguration {
 
 
-    private final UserDetailsService userDetailsService;
-
     @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {
         return config.getAuthenticationManager();

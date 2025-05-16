@@ -2,15 +2,25 @@ package com.nobleson.dashboardmanagement.service;
 
 import com.nobleson.dashboardmanagement.DELETE_YN;
 import com.nobleson.dashboardmanagement.dto.MenuDTO;
+import com.nobleson.dashboardmanagement.dto.RoleDTO;
 import com.nobleson.dashboardmanagement.mapper.MenuMapper;
+import com.nobleson.dashboardmanagement.model.Menu;
+import com.nobleson.dashboardmanagement.model.Role;
 import com.nobleson.dashboardmanagement.repository.MenuRepository;
+import com.nobleson.dashboardmanagement.repository.RoleRepository;
 import com.nobleson.dashboardmanagement.serviceInterface.MenuService;
+import com.nobleson.dashboardmanagement.tree.MenuConverter;
+import com.nobleson.dashboardmanagement.tree.MenuTree;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.sql.Timestamp;
 import java.time.Instant;
+import java.util.Comparator;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -18,6 +28,7 @@ public class MenuServiceImpl implements MenuService {
 
     private final MenuRepository menuRepository;
     private final MenuMapper menuMapper;
+    private final RoleRepository roleRepository;
 
     /**
      * Adds a new menu to the system.
@@ -27,20 +38,33 @@ public class MenuServiceImpl implements MenuService {
      */
     @Override
     public MenuDTO addMenu(MenuDTO menuDTO) {
-
-
+        // Set default values
+        Timestamp now = Timestamp.from(Instant.now());
         menuDTO.setDELETE_YN(DELETE_YN.N);
-        menuDTO.setCreatedOn(Timestamp.from(Instant.now()));
-        menuDTO.setUpdatedOn(Timestamp.from(Instant.now()));
+        menuDTO.setCreatedOn(now);
+        menuDTO.setUpdatedOn(now);
 
-        return menuMapper.MenuToMenuDTO(
-                menuRepository.save(
-                        menuMapper.MenuDTOToMenu(
-                                menuDTO
-                        )
-                )
-        );
+        // Convert DTO to entity
+        Menu menuEntity = menuMapper.MenuDTOToMenu(menuDTO);
+
+        // Handle parent relationship if needed
+        if (menuDTO.getParentId() != null) {
+            Menu parent = menuRepository.findById(menuDTO.getParentId())
+                    .orElseThrow(() -> new IllegalArgumentException("Parent menu not found: " + menuDTO.getParentId()));
+            menuEntity.setParent(parent);
+        }
+
+        // Handle roles if needed (optional)
+        if (menuDTO.getRoleIds() != null && !menuDTO.getRoleIds().isEmpty()) {
+            Set<Role> roles = new HashSet<>(roleRepository.findAllById(menuDTO.getRoleIds()));
+            menuEntity.setRoles(roles);
+        }
+
+        // Save and return
+        Menu savedMenu = menuRepository.save(menuEntity);
+        return menuMapper.MenuToMenuDTO(savedMenu);
     }
+
 
     /**
      * Updates an existing menu in the system.
@@ -80,24 +104,26 @@ public class MenuServiceImpl implements MenuService {
         );
 
         // Set the parent menu only if the new parent is provided
-        updatedMenu.setParent(
-                (menuDTO.getParent() == null)
-                        ? updatedMenu.getParent()
-                        : menuDTO.getParent()
+        updatedMenu.setParentId(
+                (menuDTO.getParentId() == null
+                ? updatedMenu.getParentId()
+                        : menuDTO.getParentId())
         );
 
-        // Update the children menus only if the new children list is not empty
-        updatedMenu.setChildren(
-                (menuDTO.getChildren() == null || menuDTO.getChildren().isEmpty())
-                        ? updatedMenu.getChildren()
-                        : menuDTO.getChildren()
+        updatedMenu.setChildrenId(
+                menuDTO.getChildrenId() == null ? updatedMenu.getChildrenId() : menuDTO.getChildrenId()
         );
+
+        updatedMenu.setSortOrder(
+                menuDTO.getSortOrder() == null ? updatedMenu.getSortOrder() : menuDTO.getSortOrder()
+        );
+
 
         // Update the roles associated with this menu
-        updatedMenu.setRoles(
-                (menuDTO.getRoles() == null || menuDTO.getRoles().isEmpty())
-                        ? updatedMenu.getRoles()
-                        : menuDTO.getRoles()
+        updatedMenu.setRoleIds(
+                (menuDTO.getRoleIds() == null || menuDTO.getRoleIds().isEmpty())
+                        ? updatedMenu.getRoleIds()
+                        : menuDTO.getRoleIds()
         );
 
         // Set DELETE_YN to 'N' (not deleted)
@@ -135,11 +161,13 @@ public class MenuServiceImpl implements MenuService {
     public MenuDTO getMenuById(String  menuName) {
         return
                 menuMapper.MenuToMenuDTO(
-                        menuRepository.findByMenuNameAndDELETE_YN(
-                                menuName, "N"
+                        menuRepository.findMenuByMenuId(
+                                menuName
                         )
                 );
     }
+
+
 
     /**
      * Retrieves all menus in the system.
@@ -153,4 +181,14 @@ public class MenuServiceImpl implements MenuService {
                         menuMapper::MenuToMenuDTO
                 ).toList();
     }
+
+    public List<MenuDTO> getMenuTreeForUser(String username) {
+        List<Menu> allMenus = menuRepository.findAllMenusByUsername(username);
+        MenuTree<Menu> menuTree = new MenuTree<>(
+                allMenus,
+                Comparator.comparingInt(Menu::getSortOrder)
+        );
+        return MenuConverter.convertToDTO(menuTree.getRoots());
+    }
+
 }

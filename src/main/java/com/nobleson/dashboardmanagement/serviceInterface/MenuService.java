@@ -44,4 +44,6 @@ public interface MenuService {
      */
     List<MenuDTO> getAllMenu();
 
+    List<MenuDTO> getMenuTreeForUser(String username);
+
 }

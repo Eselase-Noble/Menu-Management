@@ -5,6 +5,7 @@ import com.nobleson.dashboardmanagement.serviceInterface.MenuService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -37,8 +38,16 @@ public class MenuController {
         return new ResponseEntity<>(menuService.updateMenu(menuDTO), HttpStatus.OK);
     }
 
+    @DeleteMapping("/delete-user")
     public ResponseEntity<String> deleteMenuById(@RequestParam("menuId") String menuId) {
         menuService.deleteMenu(menuId);
         return new ResponseEntity<>("Menu deleted", HttpStatus.OK);
+    }
+
+    @GetMapping("/get-menu-tree-for-current-user")
+    public ResponseEntity<List<MenuDTO>> getMenuTreeForCurrentUser() {
+        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+        List<MenuDTO> menuDTOS = menuService.getMenuTreeForUser(username);
+        return new ResponseEntity<>(menuDTOS, HttpStatus.OK);
     }
 }
