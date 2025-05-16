@@ -34,8 +34,8 @@ public class AuthServiceImpl implements AuthService {
         User user = userRepository.findByUsername(request.getUsername())
                 .orElseThrow(() -> new UsernameNotFoundException("User not found"));
 
-        Set<String> roleNames = user.getRoles().stream()
-                .map(Role::getRoleName)
+        Set<String> roleIds = user.getRoles().stream()
+                .map(Role::getRoleId)
                 .collect(Collectors.toSet());
 
         Set<Menu> menus = new HashSet<>();
@@ -47,6 +47,6 @@ public class AuthServiceImpl implements AuthService {
                 .map(MenuDTO::new)
                 .collect(Collectors.toSet());
 
-        return new LoginResponse(user.getUsername(), roleNames, menuDTOs);
+        return new LoginResponse(user.getUsername(), roleIds, menuDTOs);
     }
 }

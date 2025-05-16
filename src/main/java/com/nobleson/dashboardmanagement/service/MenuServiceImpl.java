@@ -188,7 +188,7 @@ public class MenuServiceImpl implements MenuService {
                 allMenus,
                 Comparator.comparingInt(Menu::getSortOrder)
         );
-        return MenuConverter.convertToDTO(menuTree.getRoots());
+        return MenuConverter.convertToDTO(menuTree.getNodesInHierarchy());
     }
 
 }

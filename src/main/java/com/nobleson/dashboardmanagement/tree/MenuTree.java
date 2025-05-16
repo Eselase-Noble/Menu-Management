@@ -91,7 +91,45 @@ public class MenuTree<T extends TreeNode<T>> {
         return result;
     }
 
-    public List<T> toFlatList() {
+    public List<T> getNodes() {
         return new ArrayList<>(nodeMap.values());
     }
+
+    /**
+     * Returns all nodes in a flat list.
+     */
+    public List<T> toFlatList() {
+        List<T> flatList = new ArrayList<>(nodeMap.values());
+        if (comparator != null) {
+            flatList.sort(comparator);
+        }
+        return flatList;
+    }
+
+    /**
+     * Alias for toFlatList, for semantic clarity.
+     */
+    public List<T> getAllNodes() {
+        return toFlatList();
+    }
+
+    /**
+     * Returns all nodes in depth-first hierarchical order.
+     * Parents come before children.
+     */
+    public List<T> getNodesInHierarchy() {
+        List<T> result = new ArrayList<>();
+        for (T root : roots) {
+            traverseHierarchy(root, result);
+        }
+        return result;
+    }
+
+    private void traverseHierarchy(T node, List<T> result) {
+        result.add(node);
+        for (T child : node.getChildren()) {
+            traverseHierarchy(child, result);
+        }
+    }
+
 }

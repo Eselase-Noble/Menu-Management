@@ -1,5 +1,7 @@
 package com.nobleson.dashboardmanagement.configuration;
 
+import com.nobleson.dashboardmanagement.dto.LoginUserDetails;
+import com.nobleson.dashboardmanagement.model.User;
 import com.nobleson.dashboardmanagement.repository.UserRepository;
 import com.nobleson.dashboardmanagement.serviceInterface.AuthService;
 import lombok.RequiredArgsConstructor;
@@ -47,8 +49,10 @@ public class DashboardAuthenticationProvider implements AuthenticationProvider {
     public Authentication authenticate(Authentication authentication) throws AuthenticationException {
         String username = authentication.getName();
         String password = authentication.getCredentials().toString();
-        UserDetails userDetails = (UserDetails) userService.findByUsername(username).orElseThrow(() -> new UsernameNotFoundException("User not found"));;
-        if (passwordEncoder.matches(password, userDetails.getPassword())) {
+        User user =  userService.findByUsername(username).orElseThrow(() -> new UsernameNotFoundException("User not found"));;
+        if (passwordEncoder.matches(password, user.getPassword())) {
+
+            LoginUserDetails userDetails = new LoginUserDetails(user);
             //Perform necessary validations check
             return new UsernamePasswordAuthenticationToken(userDetails, password, userDetails.getAuthorities());
         }
